@@ -1,0 +1,8 @@
+---
+- name: Create SSH keypair
+  ec2_key:
+    region: '{{ region }}'
+    name: 'ansible-{{ envname }}'
+    key_material: '{{ public_key }}'
+    state: present
+

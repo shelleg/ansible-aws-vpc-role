@@ -1,0 +1,44 @@
+---
+
+- name: Create subnets for RDS
+  with_items: '{{ rds.subnets }}'
+  ec2_vpc_subnet:
+    state: present
+    region: '{{ region }}'
+    vpc_id: '{{ ec2_vpc.vpc_id }}'
+    cidr: '{{ item.cidr }}'
+    az: '{{ item.az }}'
+    resource_tags:
+      Name: '{{ envname }}_{{ item.name }}'
+      net: '{{ item.name }}'
+      environment: '{{ envname }}'
+  register: rds_subnets
+
+- set_fact:
+    rds_subnet_ids: "{% for subnet in rds_subnets.results %}{{ subnet.subnet.id}} {% endfor %}"
+
+- name: create RDS subnet group
+  rds_subnet_group:
+    state: present
+    region: "{{ region }}"
+    name: "{{ envname }}-vpc-rds-subnet-group"
+    description: "{{ envname }} vpc subnet group"
+    subnets: "{{ rds_subnet_ids.strip().split(' ') }}"
+
+- name: create RDS instance for Postgres
+  rds:
+    command: create
+    region: "{{ region }}"
+    size: 50
+    instance_name: "{{ envname }}-{{ rds.db_engine }}-db"
+    instance_type: "{{ rds.instance_type }}"
+    db_engine: "{{ rds.db_engine }}"
+    db_name: "{{ db_schema }}"
+    username: "{{ db_user }}"
+    password: "{{ db_password }}"
+    subnet: "{{ envname }}-vpc-rds-subnet-group"
+    vpc_security_groups: "{{ vpc_sec_group.0.group_id }}"
+    wait: yes # will wait for the instance to be ready.
+    wait_timeout: 600
+    tags:
+      environment: "{{ envname }}"

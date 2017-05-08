@@ -1,0 +1,24 @@
+---
+- name: Create NAT instance
+  ec2:
+    termination_protection: yes
+    region: '{{ region }}'
+    keypair: 'ansible-{{ envname }}'
+    image: "{{ nat_ami }}"
+    instance_type: t2.small
+    instance_tags:
+      Name: 'nat'
+      environment: '{{ envname }}'
+      roles: 'nat'
+    count_tag:
+      Name: 'nat'
+      environment: '{{ envname }}'
+    exact_count: 1
+    vpc_subnet_id: "{{ (vpc_subnet.results|selectattr('subnet.tags.net', 'equalto', 'public')|first).subnet.id }}"
+    assign_public_ip: True
+    wait: yes
+    wait_timeout: 600
+    source_dest_check: False
+    group: allow_vpc
+  register: nat_instance
+

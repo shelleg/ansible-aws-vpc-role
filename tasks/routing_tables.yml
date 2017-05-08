@@ -1,0 +1,14 @@
+---
+- name: Create routing tables
+  with_items: '{{ routing_tables }}'
+  ec2_vpc_route_table:
+    vpc_id: "{{ ec2_vpc.vpc_id }}"
+    region: "{{ region }}"
+    tags:
+      Name: '{{ envname }}_{{ item.subnet }}_route'
+      environment: '{{ envname }}'
+      net: '{{ item.subnet }}'
+    subnets: ["{{ (vpc_subnet.results|selectattr('subnet.tags.net', 'equalto', item.subnet)|first).subnet.id }}"]
+    routes: '{{ item.routes }}'
+  register: routing_tables
+

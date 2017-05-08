@@ -1,0 +1,135 @@
+---
+- set_fact: 
+    admin_portal_instances: "{% for result in ec2_instances.results %}{% for tagged in result.tagged_instances %}{% if 'admin-portal' in tagged.tags.roles.split(',') %}{{ tagged.id }} {% endif %}{% endfor %}{% endfor %}"
+    app_server_instances: "{% for result in ec2_instances.results %}{% for tagged in result.tagged_instances %}{% if 'application-server' in tagged.tags.roles.split(',') %}{{ tagged.id }} {% endif %}{% endfor %}{% endfor %}"
+    metadata_service_instances: "{% for result in ec2_instances.results %}{% for tagged in result.tagged_instances %}{% if 'metadata-service' in tagged.tags.roles.split(',') %}{{ tagged.id }} {% endif %}{% endfor %}{% endfor %}"
+    
+- name: Create admin-portal load-balancer
+  with_items: '{{ instances|selectattr("loadbalancer", "defined")|selectattr("loadbalancer")|list }}'
+  when: "'admin-portal' in item.roles.split(',')"
+  register: admin_portal_elb
+  ec2_elb_lb:
+    name: '{{ envname }}-admin-portal'
+    region: '{{ region }}'
+    state: present
+    subnets: ["{{ (vpc_subnet.results|selectattr('subnet.tags.net', 'equalto', 'public')|first).subnet.id }}"]
+    instance_ids: "{{ admin_portal_instances.strip().split(' ') }}"
+    #security_group_names: [web_lb, allow_vpc]
+    # changed to one below because of a bug in Ansible 2.1.x.
+    security_group_ids:
+      - '{{ (ec2_security_groups.results|selectattr("invocation.module_args.name", "equalto", "allow_vpc")|first).group_id }}'
+      - '{{ (ec2_security_groups.results|selectattr("invocation.module_args.name", "equalto", "web_lb")|first).group_id }}'
+    wait: True
+    stickiness:
+      type: loadbalancer
+      enabled: yes
+      expiration: 300
+
+    health_check:
+      ping_protocol: http
+      ping_port: "{{ webserver_host_port }}"
+      ping_path: /api/v1/heartbeat
+      response_timeout: 5
+      interval: 10
+      unhealthy_threshold: 5
+      healthy_threshold: 3
+
+    listeners:
+      #- protocol: http
+        #load_balancer_port: 80
+        #instance_port: 80
+        #proxy_protocol: True
+    ### Uncomment-out this  section when you have a ssl_certificate_id from AWS
+      - protocol: https
+        load_balancer_port: 443
+        instance_protocol: http
+        instance_port: "{{ webserver_host_port }}"
+        proxy_protocol: True
+        ssl_certificate_id: "{{ ssl_certificate_arn }}" 
+
+- name: Create Application Server load-balancer
+  with_items: '{{ instances|selectattr("loadbalancer", "defined")|selectattr("loadbalancer")|list }}'
+  when: "'application-server' in item.roles.split(',')"
+  register: application_server_elb
+  ec2_elb_lb:
+    name: '{{ envname }}-application-server'
+    region: '{{ region }}'
+    state: present
+    subnets: ["{{ (vpc_subnet.results|selectattr('subnet.tags.net', 'equalto', 'public')|first).subnet.id }}"]
+    instance_ids: "{{ app_server_instances.strip().split(' ') }}"
+    #security_group_names: [web_lb, allow_vpc]
+    # changed to one below because of a bug in Ansible 2.1.x.
+    security_group_ids:
+      - '{{ (ec2_security_groups.results|selectattr("invocation.module_args.name", "equalto", "allow_vpc")|first).group_id }}'
+      - '{{ (ec2_security_groups.results|selectattr("invocation.module_args.name", "equalto", "web_lb")|first).group_id }}'
+    wait: True
+    stickiness:
+      type: loadbalancer
+      enabled: yes
+      expiration: 300
+
+    health_check:
+      ping_protocol: http
+      ping_port: "{{ appserver_host_port }}"
+      ping_path: /heartbeat
+      response_timeout: 30
+      interval: 60
+      unhealthy_threshold: 5
+      healthy_threshold: 3
+    listeners:
+      #- protocol: http
+        #load_balancer_port: 80
+        #instance_port: 80
+        #proxy_protocol: True
+    ### Uncomment-out this  section when you have a ssl_certificate_id from AWS
+      - protocol: https
+        load_balancer_port: 443
+        instance_protocol: http
+        instance_port: "{{ appserver_host_port }}"
+        proxy_protocol: True
+        ssl_certificate_id: "{{ ssl_certificate_arn }}" 
+
+- name: Create metadata-service load-balancer
+  with_items: '{{ instances|selectattr("loadbalancer", "defined")|selectattr("loadbalancer")|list }}'
+  when: "'metadata-service' in item.roles.split(',')"
+  register: admin_portal_elb
+  ec2_elb_lb:
+    name: '{{ envname }}-metadata-service'
+    region: '{{ region }}'
+    state: present
+    scheme: "internal"
+    subnets: ["{{ (vpc_subnet.results|selectattr('subnet.tags.net', 'equalto', 'private')|first).subnet.id }}"]
+    instance_ids: "{{ metadata_service_instances.strip().split(' ') }}"
+    # security_group_names: [web_lb, allow_vpc]
+    # changed to one below because of a bug in Ansible 2.1.x.
+    security_group_ids:
+      - '{{ (ec2_security_groups.results|selectattr("invocation.module_args.name", "equalto", "allow_vpc")|first).group_id }}'
+      # - '{{ (ec2_security_groups.results|selectattr("invocation.module_args.name", "equalto", "web_lb")|first).group_id }}'
+    wait: True
+    # stickiness:
+    #   type: loadbalancer
+    #   enabled: yes
+    #   expiration: 300
+
+    health_check:
+      ping_protocol: http
+      ping_port: "{{ metadata_host_port }}"
+      ping_path: /
+      response_timeout: 5
+      interval: 10
+      unhealthy_threshold: 5
+      healthy_threshold: 3
+
+    listeners:
+      - protocol: http
+        load_balancer_port: 80
+        instance_protocol: http
+        instance_port: "{{ metadata_host_port }}"
+        proxy_protocol: True
+    ### Uncomment-out this  section when you have a ssl_certificate_id from AWS
+      # - protocol: https
+      #   load_balancer_port: 443
+      #   instance_protocol: http
+      #   instance_port: "{{ metadata_host_port }}"
+      #   proxy_protocol: True
+      #   ssl_certificate_id: "{{ ssl_certificate_arn }}" 

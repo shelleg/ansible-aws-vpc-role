@@ -1,0 +1,14 @@
+---
+- name: Create subnets
+  with_dict: '{{ subnets }}'
+  ec2_vpc_subnet:
+    state: present
+    region: '{{ region }}'
+    vpc_id: '{{ ec2_vpc.vpc_id }}'
+    cidr: '{{ item.value }}'
+    az: '{{ availability_zone }}'
+    resource_tags:
+      Name: '{{ envname }}_{{ item.key }}'
+      net: '{{ item.key }}'
+      environment: '{{ envname }}'
+  register: vpc_subnet

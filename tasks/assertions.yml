@@ -1,0 +1,14 @@
+---
+# tasks file for vpc
+- assert:
+    that:
+      - region is defined
+      - envname is defined
+      - cidr_block is defined
+      - subnets is iterable
+      - instances is iterable
+      - public_key is defined
+      - availability_zone is defined
+        #- routing_tables is iterable
+      - security_groups is iterable
+      - instances is iterable

@@ -1,0 +1,16 @@
+---
+# tasks file for vpc
+- include: assertions.yml
+- include: iam.yml
+- include: vpc.yml
+- include: subnets.yml
+- include: security_groups.yml
+- include: keypair.yml
+- include: rds.yml
+  when: use_rds
+  static: no
+- include: nat_instances.yml
+- include: routing_tables.yml
+- include: ec2_instances.yml
+- include: lb.yml
+- include: s3.yml

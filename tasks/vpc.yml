@@ -1,0 +1,17 @@
+---
+- name: Create VPC
+  ec2_vpc:
+    region: "{{ region }}"
+    state: present
+    cidr_block: '{{ cidr_block }}'
+    resource_tags:
+      environment: '{{ envname }}'
+      Name: '{{ envname }}'
+    internet_gateway: True
+    wait: yes
+  register: ec2_vpc
+
+- name: VPC ID
+  debug:
+    var: ec2_vpc.vpc_id
+

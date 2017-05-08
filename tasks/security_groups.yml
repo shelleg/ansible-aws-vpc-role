@@ -1,0 +1,14 @@
+---
+- name: Create security groups
+  with_items: '{{ security_groups }}'
+  ec2_group:
+    description: '{{ item.description }}'
+    name: '{{ item.name }}'
+    vpc_id: '{{ ec2_vpc.vpc_id }}'
+    region: '{{ region }}'
+    state: present
+    rules: '{{ item.rules|default(omit) }}'
+  register: ec2_security_groups
+
+- set_fact:
+    vpc_sec_group: "{{ ec2_security_groups.results|selectattr('item.name', 'equalto', 'allow_vpc')|list }}"
