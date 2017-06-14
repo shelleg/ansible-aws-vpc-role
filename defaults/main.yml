@@ -9,7 +9,7 @@ gpu_ami: "ami-9af668e9"
 nat_ami: "ami-ef76e898"
 use_rds: no
 aws_s3_bucket_name: "imagestore-bucket"
-public_key: 'file or value for public key for amazon keypair'
+public_key: '{{ id_rsa_project_ansible_pub }}'
 availability_zone: '{{ availability_zone }}'
 create_infra_instances: True
 load_balanced_roles:
