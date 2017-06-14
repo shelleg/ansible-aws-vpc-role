@@ -1,30 +1,33 @@
 ---
+
 - name: Create instances
-  with_items: '{{ instances }}'
+  with_nested: 
+    - '{{ instances }}'
+    - '{{ subnets  }}'
+  when: item.0.subnet_category == item.1.category
   ec2:
     region: '{{ region }}'
-    zone: '{{ item.az|default(availability_zone) }}'
+    zone: "{{ item.1.az }}"
     keypair: 'ansible-{{ envname }}'
-    instance_type: '{{ item.type }}'
-    image: '{{ item.image|default(ami) }}'
-    groups: '{{ item.groups|default(["allow_vpc"]) }}'
+    instance_type: '{{ item.0.type }}'
+    image: '{{ item.0.image|default(ami) }}'
+    groups: '{{ item.0.groups|default(["allow_vpc"]) }}'
     instance_tags:
-      Name: '{{ item.name }}'
+      Name: '{{ item.0.name }}'
       environment: '{{ envname }}'
-      roles: '{{ item.roles }}'
+      roles: '{{ item.0.roles }}'
     count_tag:
-      Name: '{{ item.name}}'
+      Name: '{{ item.0.name}}'
       environment: '{{ envname }}'
-    exact_count: '{{ item.count|default("1") }}'
-    vpc_subnet_id: "{{ (vpc_subnet.results|selectattr('subnet.tags.net', 'equalto', item.subnet)|first).subnet.id }}"
-    assign_public_ip: '{{ item.subnet == "public" }}'
+    exact_count: '{{ item.0.count|default("1") }}'
+    vpc_subnet_id: "{{ (vpc_subnet.results|selectattr('subnet.tags.net', 'equalto', item.1.name)|first).subnet.id }}"
+    assign_public_ip: '{{ item.1.type == "public" }}'
     wait: yes
     wait_timeout: 600
     #instance_profile_name: '{{ envname }}_{{ item.role }}'
-    instance_profile_name: "{{ item.iam_role|default(envname+'_'+item.name) }}"
+    instance_profile_name: "{{ item.0.iam_role|default(envname+'_'+item.0.name) }}"
     source_dest_check: '{{ item.source_dest_check|default(omit) }}'
-    volumes: '{{ item.volumes|default(omit) }}'
-    ebs_optimized: '{{ item.ebs_optimized|default(False) }}'
-    user_data: '{{ item.user_data|default(omit) }}'
+    volumes: '{{ item.0.volumes|default(omit) }}'
+    ebs_optimized: '{{ item.0.ebs_optimized|default(False) }}'
+    user_data: '{{ item.0.user_data|default(omit) }}'
   register: ec2_instances
-

@@ -11,6 +11,10 @@
   static: no
 - include: nat_instances.yml
 - include: routing_tables.yml
+# db and redis
+- include: infra_instances.yml
+  when: create_infra_instances
+  static: no
 - include: ec2_instances.yml
 - include: lb.yml
 - include: s3.yml

@@ -1,14 +1,19 @@
 ---
+
 - name: Create subnets
-  with_dict: '{{ subnets }}'
+  with_items: "{{ subnets }}"
   ec2_vpc_subnet:
     state: present
     region: '{{ region }}'
     vpc_id: '{{ ec2_vpc.vpc_id }}'
-    cidr: '{{ item.value }}'
-    az: '{{ availability_zone }}'
+    cidr: "{{ item.cidr }}"
+    az: '{{ item.az }}'
     resource_tags:
-      Name: '{{ envname }}_{{ item.key }}'
-      net: '{{ item.key }}'
+      Name: '{{ envname }}_{{ item.name }}'
+      net: '{{ item.name }}'
       environment: '{{ envname }}'
+      type: "{{ item.type }}"
+      category: "{{ item.category }}"
   register: vpc_subnet
+
+- debug: var=vpc_subnet.results

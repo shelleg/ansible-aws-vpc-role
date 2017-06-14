@@ -1,5 +1,6 @@
 ---
 - name: Create NAT instance
+  with_items: "{{ subnets | selectattr('type', 'equalto', 'public') | list }}"
   ec2:
     termination_protection: yes
     region: '{{ region }}'
@@ -7,18 +8,18 @@
     image: "{{ nat_ami }}"
     instance_type: t2.small
     instance_tags:
-      Name: 'nat'
+      Name: "nat"
       environment: '{{ envname }}'
       roles: 'nat'
     count_tag:
-      Name: 'nat'
+      Name: "nat"
       environment: '{{ envname }}'
     exact_count: 1
-    vpc_subnet_id: "{{ (vpc_subnet.results|selectattr('subnet.tags.net', 'equalto', 'public')|first).subnet.id }}"
+    vpc_subnet_id: "{{ (vpc_subnet.results|selectattr('subnet.tags.net', 'equalto', item.name)|first).subnet.id }}"
     assign_public_ip: True
     wait: yes
     wait_timeout: 600
     source_dest_check: False
     group: allow_vpc
-  register: nat_instance
+  register: nat_instances
 

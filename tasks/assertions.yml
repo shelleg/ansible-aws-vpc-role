@@ -4,6 +4,7 @@
     that:
       - region is defined
       - envname is defined
+      - create_infra_instances
       - cidr_block is defined
       - subnets is iterable
       - instances is iterable

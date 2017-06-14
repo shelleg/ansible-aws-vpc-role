@@ -1,21 +1,9 @@
 ---
 
-- name: Create subnets for RDS
-  with_items: '{{ rds.subnets }}'
-  ec2_vpc_subnet:
-    state: present
-    region: '{{ region }}'
-    vpc_id: '{{ ec2_vpc.vpc_id }}'
-    cidr: '{{ item.cidr }}'
-    az: '{{ item.az }}'
-    resource_tags:
-      Name: '{{ envname }}_{{ item.name }}'
-      net: '{{ item.name }}'
-      environment: '{{ envname }}'
-  register: rds_subnets
+- debug: var=vpc_subnets.results
 
 - set_fact:
-    rds_subnet_ids: "{% for subnet in rds_subnets.results %}{{ subnet.subnet.id}} {% endfor %}"
+    rds_subnet_ids: "{% for subnet in vpc_subnets.results %}{{ subnet.subnet.id}} {% endfor %}"
 
 - name: create RDS subnet group
   rds_subnet_group:

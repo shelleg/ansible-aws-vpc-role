@@ -1,0 +1,35 @@
+---
+
+- debug: msg="{{ item.groups | default(["allow_vpc"]) }}"
+  with_items:
+    - '{{ infra_instances }}'
+
+- name: Create infra instances
+  with_items: 
+    - '{{ infra_instances }}'
+  ec2:
+    region: '{{ region }}'
+    zone: "{{ region }}a"
+    keypair: 'ansible-{{ envname }}'
+    instance_type: '{{ item.type }}'
+    image: '{{ item.image|default(ami) }}'
+    groups: '{{ item.groups|default(["allow_vpc"]) }}'
+    instance_tags:
+      Name: '{{ item.name }}'
+      environment: '{{ envname }}'
+      roles: '{{ item.roles }}'
+    count_tag:
+      Name: '{{ item.name}}'
+      environment: '{{ envname }}'
+    exact_count: '{{ item.count|default("1") }}'
+    # use one of the private subnets
+    vpc_subnet_id: "{{ (vpc_subnet.results|selectattr('subnet.tags.type', 'equalto', 'private')|first).subnet.id }}"
+    assign_public_ip: no
+    wait: yes
+    wait_timeout: 600
+    #instance_profile_name: '{{ envname }}_{{ item.role }}'
+    source_dest_check: '{{ item.source_dest_check|default(omit) }}'
+    volumes: '{{ item.volumes|default(omit) }}'
+    ebs_optimized: '{{ item.ebs_optimized|default(False) }}'
+    user_data: '{{ item.user_data|default(omit) }}'
+  register: ec2_infra_instances

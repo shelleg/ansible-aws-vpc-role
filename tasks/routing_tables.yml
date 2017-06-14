@@ -1,14 +1,39 @@
 ---
-- name: Create routing tables
-  with_items: '{{ routing_tables }}'
+
+- name: Create public subnets routing tables
+  with_items: "{{ subnets | selectattr('type', 'equalto', 'public') | list }}"
   ec2_vpc_route_table:
     vpc_id: "{{ ec2_vpc.vpc_id }}"
     region: "{{ region }}"
     tags:
-      Name: '{{ envname }}_{{ item.subnet }}_route'
+      Name: '{{ envname }}_{{ item.name }}_route'
       environment: '{{ envname }}'
-      net: '{{ item.subnet }}'
-    subnets: ["{{ (vpc_subnet.results|selectattr('subnet.tags.net', 'equalto', item.subnet)|first).subnet.id }}"]
-    routes: '{{ item.routes }}'
-  register: routing_tables
+      net: '{{ item.name }}'
+    subnets: "{{ vpc_subnet.results|selectattr('subnet.tags.net', 'equalto', item.name)|list|map(attribute='subnet.id')|list }}"
+    routes:
+      - dest: "{{ item.cidr }}"
+        gateway_id: local
+      - dest: '0.0.0.0/0'
+        gateway_id: "{{ ec2_vpc.igw_id }}"
+  register: public_routing_tables
+  tags:
+    - routing_tables
 
+- name: Create private subnets routing tables
+  with_items: "{{ subnets | selectattr('type', 'equalto', 'private') | list }}"
+  ec2_vpc_route_table:
+    vpc_id: "{{ ec2_vpc.vpc_id }}"
+    region: "{{ region }}"
+    tags:
+      Name: '{{ envname }}_{{ item.name }}_route'
+      environment: '{{ envname }}'
+      net: '{{ item.name }}'
+    subnets: "{{ vpc_subnet.results|selectattr('subnet.tags.net', 'equalto', item.name)|list|map(attribute='subnet.id')|list }}"
+    routes:
+      - dest: "{{ item.cidr }}"
+        gateway_id: local
+      - dest: '0.0.0.0/0'
+        instance_id: "{{ (nat_instances.results|first).tagged_instances.0.id }}"
+  register: private_routing_tables
+  tags:
+    - routing_tables

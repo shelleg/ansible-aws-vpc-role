@@ -1,32 +1,55 @@
 ---
-# ami-ed82e39e - ubuntu 14.04
-ami: 'ami-ed82e39e'
-use_rds: no
+# eu-west-1 / Ireland
+region: eu-west-1
+availability_zone: eu-west-1a
+#ami-2094cf46 - ubuntu 14.04
 #ami-ca80a0b9 - ubuntu 16.04
-#ami: 'ami-ca80a0b9'
+ami: "ami-2094cf46"
+gpu_ami: "ami-9af668e9"
+nat_ami: "ami-ef76e898"
+use_rds: no
 aws_s3_bucket_name: "imagestore-bucket"
-public_key: '{{ id_rsa_project_ansible_pub }}'
+public_key: 'file or value for public key for amazon keypair'
 availability_zone: '{{ availability_zone }}'
-#rds:
-#  instance_type: "db.t2.medium"
-#  db_engine: "postgres"
-#  subnets:
-#    - name: rds1
-#      cidr: 172.16.1.0/24
-#      az: "{{ region }}a"
-#    - name: rds2
-#      cidr: 172.16.2.0/24
-#      az: "{{ region }}b"
-#instances:
-#    - role:
-#      type:
-#      image:
-#      count:
-#      subnet:
-#      source_dest_check:
-#      volumes:
-#      loadbalancer:
-#      groups:
+create_infra_instances: True
+load_balanced_roles:
+  - name: role1_behind_lb
+    # name of the public subnet in the same az as the role1 service private subnet
+    lb_subnet_name: public1
+    instance_protocol: http
+    instance_port: 80
+    ssl_certificate_arn: arn:aws:iam::375296840481:server-certificate/linnovate_cert
+    stickiness:
+      type: loadbalancer
+      enabled: yes
+      expiration: 300
+    health_check:
+      ping_protocol: http
+      ping_port: 80
+      ping_path: /api/v1/heartbeat
+      response_timeout: 5
+      interval: 10
+      unhealthy_threshold: 5
+      healthy_threshold: 3
+  - name: role2_behind_lb
+    # name of the public subnet in the same az as the role1 service private subnet
+    lb_subnet_name: public2
+    instance_protocol: http
+    instance_port: 80
+    ssl_certificate_arn: arn:aws:iam::375296840481:server-certificate/linnovate_cert
+    stickiness:
+      type: loadbalancer
+      enabled: yes
+      expiration: 300
+    health_check:
+      ping_protocol: http
+      ping_port: 80
+      ping_path: /heartbeat
+      response_timeout: 30
+      interval: 60
+      unhealthy_threshold: 5
+      healthy_threshold: 3
+  
 routing_tables:
     - subnet: public
       routes:
@@ -40,6 +63,7 @@ routing_tables:
             gateway_id: local
           - dest: "0.0.0.0/0"
             instance_id: "{{ nat_instance.tagged_instances.0.id }}"
+            
 security_groups:
     - description: Allow all from this VPC
       name: allow_vpc
@@ -63,10 +87,10 @@ security_groups:
     - description: Web load balancer
       name: web_lb
       rules:
-          - proto: tcp
-            cidr_ip: 0.0.0.0/0
-            from_port: 80
-            to_port: 80
+          # - proto: tcp
+          #   cidr_ip: 0.0.0.0/0
+          #   from_port: 80
+          #   to_port: 80
           - proto: tcp
             cidr_ip: 0.0.0.0/0
             from_port: 443
