@@ -30,7 +30,7 @@
     stickiness:
       type: "{{ item.stickiness.type }}"
       enabled: "{{ item.stickiness.enabled }}"
-      expiration: "{{ item.stickiness.expiration }}"
+      # expiration: "{{ item.stickiness.expiration }}"
 
     health_check:
       ping_protocol: "{{ item.health_check.ping_protocol }}"
