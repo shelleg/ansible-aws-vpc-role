@@ -28,7 +28,7 @@
     #   - '{{ (ec2_security_groups.results|selectattr("invocation.module_args.name", "equalto", "web_lb")|first).group_id }}'
     wait: 
     tags:
-      Name: '{{ envname }}-{{ item.name|replace('_', '-') }}''
+      Name: "{{ envname }}-{{ item.name|replace('_', '-') }}"
       environment: '{{ envname }}'
     stickiness:
       type: "{{ item.stickiness.type }}"
