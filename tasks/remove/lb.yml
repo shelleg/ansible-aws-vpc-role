@@ -1,0 +1,24 @@
+---
+
+- set_fact:
+    lbnames: 
+      - "{{ envname }}-admin-portal"
+      - "{{ envname }}-application-server"
+      - "{{ envname }}-metadata-service"
+
+- name: delete load balancers
+  ec2_elb_lb:
+    name: "{{ item }}"
+    state: absent
+    region: "{{ region }}"
+  with_items: "{{ lbnames }}"
+  tags: ['delete']
+
+#- name: delete load balancers
+  #ec2_elb_lb:
+    #name: "{{ envname }}-{{ item.role }}"
+    #state: absent
+    #region: "{{ region }}"
+  #with_items: "{{ instances }}"
+  #tags: ['delete']
+

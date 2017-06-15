@@ -1,0 +1,34 @@
+---
+- name: get vpc subnet facts
+  register: vpcsubnets
+  ec2_vpc_subnet_facts:
+    region: "{{ region }}"
+    filters:
+      vpc-id: "{{ item }}"
+  with_items: "{{ vpcids }}"
+  tags: ['collect']
+
+- debug: var=vpcsubnets
+  tags: ['collect']
+
+- set_fact: vpcsubnetlist="{{ vpcsubnets.results|sum(attribute='subnets', start=[]) }}"
+  when: vpcsubnets.results is defined
+  tags: ['collect']
+
+- set_fact: vpcsubnetlist="{{ vpcsubnets.subnets }}"
+  when: vpcsubnets.subnets is defined
+  tags: ['collect']
+
+- name: delete all VPC subnets
+  register: result
+  retries: 5
+  delay: 5
+  until: result|success
+  ec2_vpc_subnet:
+    state: absent
+    region: "{{ region }}"
+    vpc_id: "{{ item.vpc_id }}"
+    cidr: "{{ item.cidr_block }}"
+  with_items:
+    - "{{ vpcsubnetlist }}"
+  tags: ['delete']

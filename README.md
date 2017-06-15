@@ -1,4 +1,9 @@
 ## VARS
+command variable state whether to create or remove/clean the VPC from amazon
+options are create or remove
+```yaml
+command: create
+```
 
 # instances
 ```yaml
@@ -16,3 +21,11 @@
         loadbalancer: True
 ```
 roles must only be using underscores as seperators and not hyphens
+
+# RDS/ElasticCache
+if you want to use RDS and ElasticCache ie. 
+```yaml
+    use_data_cloud_services: true
+```
+you must supply two or more AZ for deployment which means you will have a highly
+available deployment (num of AZs * service machines for each service)

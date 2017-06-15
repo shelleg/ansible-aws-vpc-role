@@ -1,0 +1,22 @@
+---
+
+- name: get rds info
+  register: rds_facts
+  rds:
+    region: "{{ region }}"
+    instance_name: "{{ envname }}-{{ rds.db_engine }}-db"
+    command: facts
+
+- name: delete rds instance
+  rds:
+    region: "{{ region }}"
+    instance_name: "{{ envname }}-{{ rds.db_engine }}-db"
+    wait: yes
+    wait_timeout: 600
+    command: delete
+
+- name: delete rds subnet group
+  rds_subnet_group:
+    state: absent
+    name: "{{ envname }}-vpc-rds-subnet-group"
+    region: "{{ region }}"

@@ -1,0 +1,36 @@
+---
+- name: get VPC route tables
+  register: vpcroutetable
+  ec2_vpc_route_table_facts:
+    region: "{{ region }}"
+    filters:
+      vpc-id: "{{ item }}"
+  with_items: "{{ vpcids }}"
+  tags: ['collect']
+
+- debug: var=vpcroutetable
+  tags: ['collect']
+
+- set_fact: vpcroutetables="{{ vpcroutetable.results|sum(attribute='route_tables', start=[]) }}"
+  when: vpcroutetable.results is defined
+  tags: ['collect']
+
+- set_fact: vpcroutetables="{{ vpcroutetable.route_tables }}"
+  when: vpcroutetable.route_tables is defined
+  tags: ['collect']
+
+- debug: var=vpcsubnetlist
+  tags: ['collect']
+- debug: var=vpcroutetables
+  tags: ['collect']
+
+
+- name: delete all VPC route tables
+  ec2_vpc_route_table:
+    state: absent
+    region: "{{ region }}"
+    route_table_id: "{{ item.id }}"
+    vpc_id: "{{ item.vpc_id }}"
+  with_items:
+    - "{{ vpcroutetables }}"
+  tags: ['delete']

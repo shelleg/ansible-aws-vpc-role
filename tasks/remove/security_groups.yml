@@ -1,0 +1,13 @@
+---
+- name: delete all security groups
+  ec2_group:
+    region: "{{ region }}"
+    name: "{{ item[1] }}"
+    description: "deleted security group"
+    vpc_id: "{{ item[0] }}"
+    state: absent
+  with_nested:
+    - "{{ vpcids }}"
+    - [ 'allow_office', 'allow_ssh', 'allow_vpc', 'web_lb' ]
+  tags: ['delete']
+    

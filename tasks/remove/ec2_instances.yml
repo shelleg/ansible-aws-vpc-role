@@ -1,0 +1,65 @@
+---
+- name: Collect All VPC Instances
+  ec2_remote_facts:
+    region: "{{ region }}"
+    filters:
+      "tag:environment": "{{ envname }}"
+      instance-state-name: running
+  register: awsfacts
+  tags: ['collect']
+  
+- debug: var=awsfacts
+  tags: ['collect']
+
+- name: Extract VPC id
+  set_fact: vpcids="{{ awsfacts.instances|map(attribute='vpc_id')|list|unique }}"
+  tags: ['collect']
+
+- debug: var=vpcids
+  tags: ['collect']
+
+- name: Collect all instance ids
+  set_fact:
+    instanceids: "{{ awsfacts.instances|map(attribute='id')|list }}"
+  tags: ['collect']
+
+- debug: var=instanceids
+  tags: ['collect']
+
+- name: Get all VMs volume ids
+  set_fact: volumes="{{ awsfacts.instances|sum(attribute='block_device_mapping', start=[])|map(attribute='volume_id')|list }}"
+  tags: ['collect']
+
+- debug: var=volumes
+  tags: ['collect']
+
+- name: disable termination protection
+  ec2:
+    instance_ids: "{{ item.id }}"
+    region: "{{ region }}"
+    state: "{{ item.state }}"
+    termination_protection: no
+    wait: yes
+  with_items: 
+    - "{{ awsfacts.instances }}"
+  when: item.state != "terminated"
+  tags: ['delete']
+
+- name: delete all instances
+  ignore_errors: yes
+  ec2:
+    instance_ids: "{{ instanceids }}"
+    state: absent
+    region: "{{ region }}"
+    wait: yes
+    wait_timeout: 600
+  tags: ['delete']
+
+- name: delete all volumes
+  ec2_vol:
+    id: "{{ item }}"
+    region: "{{ region }}"
+    state: absent
+  with_items: "{{ volumes }}"
+  tags: ['delete']
+

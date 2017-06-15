@@ -1,5 +1,6 @@
 ---
 # eu-west-1 / Ireland
+command: create
 region: eu-west-1
 availability_zone: eu-west-1a
 #ami-2094cf46 - ubuntu 14.04
@@ -7,11 +8,10 @@ availability_zone: eu-west-1a
 ami: "ami-2094cf46"
 gpu_ami: "ami-9af668e9"
 nat_ami: "ami-ef76e898"
-use_rds: no
+use_data_cloud_services: False
 aws_s3_bucket_name: "imagestore-bucket"
 public_key: '{{ id_rsa_project_ansible_pub }}'
 availability_zone: '{{ availability_zone }}'
-create_infra_instances: True
 load_balanced_roles:
   - name: role1_behind_lb
     # name of the public subnet in the same az as the role1 service private subnet
@@ -49,6 +49,15 @@ load_balanced_roles:
       interval: 60
       unhealthy_threshold: 5
       healthy_threshold: 3
+
+rds:
+  instance_type: "db.t2.medium"
+  db_engine: "postgres"
+
+elasticcache:
+  instance_type: "cache.m3.medium"
+  cache_engine: "redis"
+  cache_engine_version: 3.0.7
   
 routing_tables:
     - subnet: public

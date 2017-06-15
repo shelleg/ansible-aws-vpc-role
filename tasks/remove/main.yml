@@ -1,0 +1,14 @@
+---
+- include: lb.yml
+- include: rds.yml
+  when: use_data_cloud_services
+- include: elastic_cache.yml
+  when: use_data_cloud_services
+- include: ec2_instances.yml
+- include: subnets.yml
+- include: routing_tables.yml
+- include: security_groups.yml
+- include: vpc.yml
+- include: iam.yml
+- include: s3.yml
+- include: keypair.yml

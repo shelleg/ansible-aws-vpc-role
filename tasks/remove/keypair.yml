@@ -1,0 +1,7 @@
+---
+- name: Remove SSH keypair
+  ec2_key:
+    region: '{{ region }}'
+    name: 'ansible-{{ envname }}'
+    state: absent
+

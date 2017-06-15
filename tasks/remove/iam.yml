@@ -1,0 +1,24 @@
+# This task comes early because the roles sometimes don't appear until some
+# time has passed since the task finished.
+
+- debug: var=awsfacts
+
+- name: Remove machine specific iam roles
+  with_items: '{{ awsfacts.instances }}'
+  iam:
+    iam_type: role
+    name: '{{ envname }}_{{ item.tags.Name }}'
+    state: absent
+
+# - name: Create AnsibleDeployment IAM role
+#   iam:
+#     iam_type: role
+#     name: AnsibleDeployment
+#     state: present
+#     trust_policy:
+#       Version: '2017-01-25'
+#       Statement:
+#         - Effect: Allow
+#           Principal:
+#             Service: "ec2.amazonaws.com"
+#           Action: "sts:AssumeRole"

@@ -1,0 +1,13 @@
+---
+
+- name: Remove the elastic cache cluster
+  elasticache:
+    name: "{{ envname }}-{{ elasticcache.cache_engine }}"
+    state: absent
+    region: "{{ region }}"
+
+- name: Remove the elastic cache subnet group
+  elasticache_subnet_group:
+    name: "{{ envname }}-elasticcache-subnet-group"
+    region: "{{ region }}"
+    state: absent
