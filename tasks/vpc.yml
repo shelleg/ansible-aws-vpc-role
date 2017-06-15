@@ -4,7 +4,7 @@
     region: "{{ region }}"
     state: present
     cidr_block: '{{ cidr_block }}'
-    tags:
+    resource_tags:
       environment: '{{ envname }}'
       Name: '{{ envname }}'
     internet_gateway: True
