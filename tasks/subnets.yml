@@ -8,7 +8,7 @@
     vpc_id: '{{ ec2_vpc.vpc_id }}'
     cidr: "{{ item.cidr }}"
     az: '{{ item.az }}'
-    resource_tags:
+    tags:
       Name: '{{ envname }}_{{ item.name }}'
       net: '{{ item.name }}'
       environment: '{{ envname }}'

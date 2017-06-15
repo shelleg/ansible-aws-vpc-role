@@ -6,6 +6,9 @@
     name: "{{ envname }}-imagestore-bucket"
     state: present
     region: "{{ region }}"
+    tags:
+      Name: '{{ envname }}-imagestore-bucket'
+      environment: '{{ envname }}'
 
 - debug: var=s3_bucket_result
 
