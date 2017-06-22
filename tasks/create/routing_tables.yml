@@ -19,6 +19,8 @@
   tags:
     - routing_tables
 
+- debug: var=public_routing_tables
+
 - name: Create private subnets routing tables
   with_items: "{{ subnets | selectattr('type', 'equalto', 'private') | list }}"
   ec2_vpc_route_table:
@@ -37,3 +39,5 @@
   register: private_routing_tables
   tags:
     - routing_tables
+
+- debug: var=private_routing_tables

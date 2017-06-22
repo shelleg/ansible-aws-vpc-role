@@ -52,3 +52,5 @@
         instance_port: "{{ item.instance_port }}"
         proxy_protocol: True
         ssl_certificate_id: "{{ item.ssl_certificate_arn }}" 
+
+- debug: var=roles_elbs
