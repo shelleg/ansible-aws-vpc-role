@@ -1,12 +1,12 @@
 ---
 - name: Create NAT instance
-  with_items: "{{ subnets | selectattr('category', 'equalto', 'management') | list }}"
+  with_items: "{{ subnets | selectattr('type', 'equalto', 'public') | list }}"
   ec2:
     termination_protection: yes
     region: '{{ region }}'
     keypair: 'ansible-{{ envname }}'
-    image: "{{ nat_instance.image }}"
-    instance_type: "{{ nat_instance.type }}"
+    image: "{{ nat_ami }}"
+    instance_type: t2.small
     instance_tags:
       Name: "nat"
       environment: '{{ envname }}'
@@ -20,7 +20,6 @@
     wait: yes
     wait_timeout: 600
     source_dest_check: False
-    group: "{{ nat_instance.groups }}"
+    group: allow_vpc
   register: nat_instances
 
-- debug: var=nat_instances

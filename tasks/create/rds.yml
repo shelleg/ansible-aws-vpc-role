@@ -5,7 +5,6 @@
     rds_subnet_ids: "{{ vpc_subnet.results|selectattr('subnet.tags.category', 'equalto', 'data')|list|map(attribute='subnet.id')|list }}"
 
 - debug: var=rds_subnet_ids
-- debug: var=ec2_security_groups.results
 
 - name: create RDS subnet group
   rds_subnet_group:
@@ -23,14 +22,12 @@
     instance_name: "{{ envname }}-{{ rds.db_engine }}-db"
     instance_type: "{{ rds.instance_type }}"
     db_engine: "{{ rds.db_engine }}"
-    port: "{{ postgres_port }}"
     multi_zone: yes
     db_name: "{{ db_schema }}"
     username: "{{ db_user }}"
     password: "{{ db_password }}"
     subnet: "{{ envname }}-vpc-rds-subnet-group"
-    vpc_security_groups: "{{ ec2_security_groups.results | selectattr('item.name', 'equalto', 'allow_postgres') | map(attribute='group_id') | list }}"
+    vpc_security_groups: "{{ vpc_sec_group.0.group_id }}"
     wait: yes # will wait for the instance to be ready.
-    wait_timeout: 1200
     tags:
       environment: "{{ envname }}"

@@ -1,3 +1,23 @@
 ---
 # tasks file for vpc
-- include: "{{ command }}/main.yml"
+- include: "{{ command }}/assertions.yml"
+- include: "{{ command }}/iam.yml"
+- include: "{{ command }}/vpc.yml"
+- include: "{{ command }}/subnets.yml"
+- include: "{{ command }}/security_groups.yml"
+- include: "{{ command }}/keypair.yml"
+- include: "{{ command }}/rds.yml"
+  when: use_data_cloud_services
+  static: no
+- include: "{{ command }}/elastic_cache.yml"
+  when: use_data_cloud_services
+  static: no
+- include: "{{ command }}/nat_instances.yml"
+- include: "{{ command }}/routing_tables.yml"
+# db and redis
+- include: "{{ command }}/infra_instances.yml"
+  when: not use_data_cloud_services
+  static: no
+- include: "{{ command }}/ec2_instances.yml"
+- include: "{{ command }}/lb.yml"
+- include: "{{ command }}/s3.yml"

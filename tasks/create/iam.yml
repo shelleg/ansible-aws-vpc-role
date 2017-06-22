@@ -7,129 +7,15 @@
     name: '{{ envname }}_{{ item.name }}'
     state: present
 
-- name: Create ansible-controller IAM role
+- name: Create AnsibleDeployment IAM role
   iam:
     iam_type: role
-    name: "{{ envname }}-ansible-controller-role"
+    name: AnsibleDeployment
     state: present
-  register: iam_role
-
-- debug: var=iam_role
-
-- name: Create AnsibleDeployment RDSFullAccess policy
-  iam_policy:
-    iam_type: role
-    state: present
-    policy_name: "{{ envname }}-rds-full-access"
-    iam_name: "{{ envname }}-ansible-controller-role"
-    policy_json: |
-      {
-        "Version": "2012-10-17",
-        "Statement": [
-          {
-            "Action": [
-              "rds:*",
-              "cloudwatch:DescribeAlarms",
-              "cloudwatch:GetMetricStatistics",
-              "ec2:DescribeAccountAttributes",
-              "ec2:DescribeAvailabilityZones",
-              "ec2:DescribeSecurityGroups",
-              "ec2:DescribeSubnets",
-              "ec2:DescribeVpcs",
-              "sns:ListSubscriptions",
-              "sns:ListTopics", 
-              "logs:DescribeLogStreams", 
-              "logs:GetLogEvents" 
-            ],
-            "Effect": "Allow",
-            "Resource": "*"
-          }
-        ]
-      }
-   
-- name: Create AnsibleDeployment EC2FullAccess policy
-  iam_policy:
-    iam_type: role
-    state: present
-    policy_name: "{{ envname }}-ec2-full-access"
-    iam_name: "{{ envname }}-ansible-controller-role"
-    policy_json: |
-      {
-        "Version": "2012-10-17",
-        "Statement": [
-          {
-            "Action": "ec2:*",
-            "Effect": "Allow",
-            "Resource": "*"
-          },
-          {
-            "Effect": "Allow",
-            "Action": "elasticloadbalancing:*",
-            "Resource": "*"
-          },
-          {
-            "Effect": "Allow",
-            "Action": "cloudwatch:*",
-            "Resource": "*"
-          },
-          {
-            "Effect": "Allow",
-            "Action": "autoscaling:*",
-            "Resource": "*"
-          }
-        ]
-      }
-
-- name: Create AnsibleDeployment IAMFullAccess policy
-  iam_policy:
-    iam_type: role
-    state: present
-    policy_name: "{{ envname }}-iam-full-access"
-    iam_name: "{{ envname }}-ansible-controller-role"
-    policy_json: |
-      {
-        "Version": "2012-10-17",
-        "Statement": [
-          {
-            "Effect": "Allow",
-            "Action": "iam:*",
-            "Resource": "*"
-          }
-        ]
-      }
-
-- name: Create AnsibleDeployment ElasticCacheFullAccess policy
-  iam_policy:
-    iam_type: role
-    state: present
-    policy_name: "{{ envname }}-escache-full-access"
-    iam_name: "{{ envname }}-ansible-controller-role"
-    policy_json: |
-      {
-        "Version": "2012-10-17",
-        "Statement": [
-          {
-            "Action": "elasticache:*",
-            "Effect": "Allow",
-            "Resource": "*"
-          }
-        ]
-      }
-
-- name: Create AnsibleDeployment S3FullAccess policy
-  iam_policy:
-    iam_type: role
-    state: present
-    policy_name: "{{ envname }}-s3-full-access"
-    iam_name: "{{ envname }}-ansible-controller-role"
-    policy_json: |
-      {
-        "Version": "2012-10-17",
-        "Statement": [
-          {
-            "Effect": "Allow",
-            "Action": "s3:*",
-            "Resource": "*"
-          }
-        ]
-      }
+    trust_policy:
+      Version: '2017-01-25'
+      Statement:
+        - Effect: Allow
+          Principal:
+            Service: "ec2.amazonaws.com"
+          Action: "sts:AssumeRole"

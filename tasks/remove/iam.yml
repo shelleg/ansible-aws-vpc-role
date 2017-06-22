@@ -1,51 +1,24 @@
 # This task comes early because the roles sometimes don't appear until some
 # time has passed since the task finished.
 
-- name: Remove machine specific IAM roles
-  with_items: '{{ instances }}'
+- debug: var=awsfacts
+
+- name: Remove machine specific iam roles
+  with_items: '{{ awsfacts.instances }}'
   iam:
     iam_type: role
-    name: '{{ envname }}_{{ item.name }}'
+    name: '{{ envname }}_{{ item.tags.Name }}'
     state: absent
 
-
-- name: Remove RDSFullAccess policy
-  iam_policy:
-    iam_type: role
-    state: absent
-    policy_name: "{{ envname }}-rds-full-access"
-    iam_name: "{{ envname }}-ansible-controller-role"
-   
-- name: Remove EC2FullAccess policy
-  iam_policy:
-    iam_type: role
-    state: absent
-    policy_name: "{{ envname }}-ec2-full-access"
-    iam_name: "{{ envname }}-ansible-controller-role"
-
-- name: Remove IAMFullAccess policy
-  iam_policy:
-    iam_type: role
-    state: absent
-    policy_name: "{{ envname }}-iam-full-access"
-    iam_name: "{{ envname }}-ansible-controller-role"
-
-- name: Remove ElasticCacheFullAccess policy
-  iam_policy:
-    iam_type: role
-    state: absent
-    policy_name: "{{ envname }}-escache-full-access"
-    iam_name: "{{ envname }}-ansible-controller-role"
-
-- name: Remove S3FullAccess policy
-  iam_policy:
-    iam_type: role
-    state: absent
-    policy_name: "{{ envname }}-s3-full-access"
-    iam_name: "{{ envname }}-ansible-controller-role"
-
-- name: Remove ansible-controller IAM role
-  iam:
-    iam_type: role
-    name: "{{ envname }}-ansible-controller-role"
-    state: absent
+# - name: Create AnsibleDeployment IAM role
+#   iam:
+#     iam_type: role
+#     name: AnsibleDeployment
+#     state: present
+#     trust_policy:
+#       Version: '2017-01-25'
+#       Statement:
+#         - Effect: Allow
+#           Principal:
+#             Service: "ec2.amazonaws.com"
+#           Action: "sts:AssumeRole"

@@ -8,7 +8,6 @@
     state: absent
   with_nested:
     - "{{ vpcids }}"
-    - "{{ security_groups | map(attribute='name') | list }}"
-    # - [ 'allow_office', 'allow_ssh', 'allow_vpc', 'web_lb' ]
+    - [ 'allow_office', 'allow_ssh', 'allow_vpc', 'web_lb' ]
   tags: ['delete']
     
