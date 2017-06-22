@@ -9,6 +9,3 @@
     state: present
     rules: '{{ item.rules|default(omit) }}'
   register: ec2_security_groups
-
-- set_fact:
-    vpc_sec_group: "{{ ec2_security_groups.results|selectattr('item.name', 'equalto', 'allow_vpc')|list }}"

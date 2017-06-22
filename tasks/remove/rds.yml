@@ -2,6 +2,7 @@
 
 - name: get rds info
   register: rds_facts
+  ignore_errors: yes
   rds:
     region: "{{ region }}"
     instance_name: "{{ envname }}-{{ rds.db_engine }}-db"

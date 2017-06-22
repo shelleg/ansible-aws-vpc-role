@@ -11,7 +11,7 @@
     keypair: 'ansible-{{ envname }}'
     instance_type: '{{ item.0.type }}'
     image: '{{ item.0.image|default(ami) }}'
-    groups: '{{ item.0.groups|default(["allow_vpc"]) }}'
+    groups: '{{ item.0.groups|default(["allow_vpc_ssh"]) }}'
     instance_tags:
       Name: '{{ item.0.name }}'
       environment: '{{ envname }}'
