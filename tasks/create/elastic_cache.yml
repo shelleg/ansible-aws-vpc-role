@@ -22,9 +22,9 @@
     cache_engine_version: "{{ elasticcache.cache_engine_version }}"
     node_type: "{{ elasticcache.instance_type }}"
     num_nodes: 1
-    cache_port: 6379
+    cache_port: "{{ redis_port }}"
     wait: yes
-    security_group_ids: "{{ vpc_sec_group.0.group_id }}"
+    security_group_ids: "{{ ec2_security_groups.results | selectattr('item.name', 'equalto', 'allow_redis') | map(attribute='group_id') | list }}"
     cache_subnet_group: "{{ envname }}-elasticcache-subnet-group"
 
 - debug: var=elastic_cache_instance
