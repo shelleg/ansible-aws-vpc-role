@@ -10,7 +10,9 @@
       Name: '{{ envname }}-imagestore-bucket'
       environment: '{{ envname }}'
 
-- debug: var=s3_bucket_result
+- debug:
+    var: s3_bucket_result
+    verbosity: 1
 
 - set_fact:
     aws_s3_bucket_name: "{{ envname }}-imagestore-bucket"

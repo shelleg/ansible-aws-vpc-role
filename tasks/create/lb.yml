@@ -6,7 +6,9 @@
 - set_fact: {"{{ (item.name+'_instances') }}": "{% for result in ec2_instances.results %}{% if not result|skipped %}{% for tagged in result.tagged_instances %}{% if item.name in tagged.tags.roles.split(',') %}{{ tagged.id }} {% endif %}{% endfor %}{% endif %}{% endfor %}"}
   with_items: '{{ load_balanced_roles }}'
 
-- debug: msg="{{ vars[item.name +'_instances'] }}"
+- debug: 
+    msg: "{{ vars[item.name +'_instances'] }}"
+    verbosity: 1
   with_items: '{{ load_balanced_roles }}'
 
 - name: "Create load-balancer"
@@ -27,7 +29,7 @@
     
     #   - '{{ (ec2_security_groups.results|selectattr("invocation.module_args.name", "equalto", "allow_vpc")|first).group_id }}'
     #   - '{{ (ec2_security_groups.results|selectattr("invocation.module_args.name", "equalto", "web_lb")|first).group_id }}'
-    wait: 
+    wait: yes
     tags:
       Name: "{{ envname }}-{{ item.name|replace('_', '-') }}"
       environment: '{{ envname }}'
@@ -50,7 +52,9 @@
         load_balancer_port: 443
         instance_protocol: "{{ item.instance_protocol }}"
         instance_port: "{{ item.instance_port }}"
-        proxy_protocol: True
+        # proxy_protocol: True
         ssl_certificate_id: "{{ item.ssl_certificate_arn }}" 
 
-- debug: var=roles_elbs
+- debug:
+    var: roles_elbs
+    verbosity: 1

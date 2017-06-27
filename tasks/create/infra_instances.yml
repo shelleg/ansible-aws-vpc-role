@@ -1,6 +1,8 @@
 ---
 
-- debug: msg="{{ item.groups | default(["allow_vpc"]) }}"
+- debug: 
+    msg: "{{ item.groups | default(['allow_vpc']) }}"
+    verbosity: 1
   with_items:
     - '{{ infra_instances }}'
 
@@ -21,9 +23,9 @@
     count_tag:
       Name: '{{ item.name}}'
       environment: '{{ envname }}'
-    exact_count: '{{ item.count|default("1") }}'
+    exact_count: '{% if use_data_cloud_services %}0{% else %}{{ item.count|default("1") }}{% endif %}'
     # use one of the private subnets
-    vpc_subnet_id: "{{ (vpc_subnet.results|selectattr('subnet.tags.type', 'equalto', 'private')|first).subnet.id }}"
+    vpc_subnet_id: "{{ (vpc_subnet.results|selectattr('subnet.tags.category', 'equalto', 'data')|first).subnet.id }}"
     assign_public_ip: no
     wait: yes
     wait_timeout: 600

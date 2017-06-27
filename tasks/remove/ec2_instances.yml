@@ -8,14 +8,18 @@
   register: awsfacts
   tags: ['collect']
   
-- debug: var=awsfacts
+- debug: 
+    var: awsfacts
+    verbosity: 1
   tags: ['collect']
 
 - name: Extract VPC id
   set_fact: vpcids="{{ awsfacts.instances|map(attribute='vpc_id')|list|unique }}"
   tags: ['collect']
 
-- debug: var=vpcids
+- debug: 
+    var: vpcids
+    verbosity: 1
   tags: ['collect']
 
 - name: Collect all instance ids
@@ -23,14 +27,18 @@
     instanceids: "{{ awsfacts.instances|map(attribute='id')|list }}"
   tags: ['collect']
 
-- debug: var=instanceids
+- debug: 
+    var: instanceids
+    verbosity: 1
   tags: ['collect']
 
 - name: Get all VMs volume ids
   set_fact: volumes="{{ awsfacts.instances|sum(attribute='block_device_mapping', start=[])|map(attribute='volume_id')|list }}"
   tags: ['collect']
 
-- debug: var=volumes
+- debug: 
+    var: volumes
+    verbosity: 1
   tags: ['collect']
 
 - name: disable termination protection

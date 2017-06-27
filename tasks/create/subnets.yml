@@ -16,4 +16,6 @@
       category: "{{ item.category }}"
   register: vpc_subnet
 
-- debug: var=vpc_subnet.results
+- debug: 
+    var: vpc_subnet.results
+    verbosity: 1

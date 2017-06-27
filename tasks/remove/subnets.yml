@@ -8,7 +8,9 @@
   with_items: "{{ vpcids }}"
   tags: ['collect']
 
-- debug: var=vpcsubnets
+- debug: 
+    var: vpcsubnets
+    verbosity: 1
   tags: ['collect']
 
 - set_fact: vpcsubnetlist="{{ vpcsubnets.results|sum(attribute='subnets', start=[]) }}"
@@ -21,9 +23,6 @@
 
 - name: delete all VPC subnets
   register: result
-  retries: 5
-  delay: 5
-  until: result|success
   ec2_vpc_subnet:
     state: absent
     region: "{{ region }}"
@@ -32,3 +31,7 @@
   with_items:
     - "{{ vpcsubnetlist }}"
   tags: ['delete']
+
+- debug:
+    var: result
+    verbosity: 1

@@ -8,7 +8,9 @@
   with_items: "{{ vpcids }}"
   tags: ['collect']
 
-- debug: var=vpcroutetable
+- debug: 
+    var: vpcroutetable
+    verbosity: 1
   tags: ['collect']
 
 - set_fact: vpcroutetables="{{ vpcroutetable.results|sum(attribute='route_tables', start=[]) }}"
@@ -19,11 +21,15 @@
   when: vpcroutetable.route_tables is defined
   tags: ['collect']
 
-- debug: var=vpcsubnetlist
-  tags: ['collect']
-- debug: var=vpcroutetables
+- debug: 
+    var: vpcsubnetlist
+    verbosity: 1
   tags: ['collect']
 
+- debug: 
+    var: vpcroutetables
+    verbosity: 1
+  tags: ['collect']
 
 - name: delete all VPC route tables
   ec2_vpc_route_table:

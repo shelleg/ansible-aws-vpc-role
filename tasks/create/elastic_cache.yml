@@ -9,11 +9,12 @@
     state: present
     subnets: "{{ vpc_subnet.results|selectattr('subnet.tags.category', 'equalto', 'data')|list|map(attribute='subnet.id')|list }}"
 
-- debug: var=elastic_cache_subnet_group
-
+- debug: 
+    var: elastic_cache_subnet_group
+    verbosity: 1
 
 - name: Create the elastic cache cluster
-  register: elastic_cache_instance
+  register: elasticache_instance
   elasticache:
     name: "{{ envname }}-{{ elasticcache.cache_engine }}"
     state: present
@@ -27,4 +28,26 @@
     security_group_ids: "{{ ec2_security_groups.results | selectattr('item.name', 'equalto', 'allow_redis') | map(attribute='group_id') | list }}"
     cache_subnet_group: "{{ envname }}-elasticcache-subnet-group"
 
-- debug: var=elastic_cache_instance
+- debug:
+    var: elasticache_instance
+    verbosity: 1
+
+- set_fact:
+    elasticache_arn: "arn:aws:elasticache:{{ region }}:{{ aws_account_id }}:cluster:{{ elasticache_instance.elasticache.data.CacheClusterId }}"
+
+- name: List tags for elasticache Resource
+  changed_when: False
+  register: cmd_out
+  shell: "aws elasticache list-tags-for-resource --resource-name {{ elasticache_arn }}"
+
+- set_fact:
+    tag_list: "{{ cmd_out.stdout|from_json }}"
+
+- debug:
+    var: tag_list
+    verbosity: 1
+
+- name: Tag elasticache Resource
+  register: elasticache_tags
+  when: tag_list.TagList|selectattr('Key','equalto','environment')|list|length < 1
+  shell: "aws elasticache add-tags-to-resource --resource-name {{ elasticache_arn }} --tags Key=environment,Value={{ envname }}"

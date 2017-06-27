@@ -14,7 +14,9 @@
     state: present
   register: iam_role
 
-- debug: var=iam_role
+- debug: 
+    var: iam_role
+    verbosity: 1
 
 - name: Create AnsibleDeployment RDSFullAccess policy
   iam_policy:

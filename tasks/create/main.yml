@@ -16,8 +16,6 @@
 - include: routing_tables.yml
 # db and redis
 - include: infra_instances.yml
-  when: not use_data_cloud_services
-  static: no
 - include: ec2_instances.yml
 - include: lb.yml
 - include: s3.yml

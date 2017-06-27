@@ -4,8 +4,12 @@
     # rds_subnet_ids: "{% for subnet in vpc_subnet.results %}{{ subnet.subnet.id}} {% endfor %}"
     rds_subnet_ids: "{{ vpc_subnet.results|selectattr('subnet.tags.category', 'equalto', 'data')|list|map(attribute='subnet.id')|list }}"
 
-- debug: var=rds_subnet_ids
-- debug: var=ec2_security_groups.results
+- debug: 
+    var: rds_subnet_ids
+    verbosity: 1
+- debug: 
+    var: ec2_security_groups.results
+    verbosity: 1
 
 - name: create RDS subnet group
   rds_subnet_group:
@@ -34,3 +38,4 @@
     wait_timeout: 1200
     tags:
       environment: "{{ envname }}"
+      Name: "{{ envname }}-{{ rds.db_engine }}-db"

@@ -19,7 +19,9 @@
   tags:
     - routing_tables
 
-- debug: var=public_routing_tables
+- debug: 
+    var: public_routing_tables
+    verbosity: 1
 
 - name: Create private subnets routing tables
   with_items: "{{ subnets | selectattr('type', 'equalto', 'private') | list }}"
@@ -40,4 +42,6 @@
   tags:
     - routing_tables
 
-- debug: var=private_routing_tables
+- debug:
+    var: private_routing_tables
+    verbosity: 1

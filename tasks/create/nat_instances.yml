@@ -23,4 +23,6 @@
     group: "{{ nat_instance.groups }}"
   register: nat_instances
 
-- debug: var=nat_instances
+- debug: 
+    var: nat_instances
+    verbosity: 1
