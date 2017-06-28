@@ -13,15 +13,6 @@
     verbosity: 1
   tags: ['collect']
 
-- name: Extract VPC id
-  set_fact: vpcids="{{ awsfacts.instances|map(attribute='vpc_id')|list|unique }}"
-  tags: ['collect']
-
-- debug: 
-    var: vpcids
-    verbosity: 1
-  tags: ['collect']
-
 - name: Collect all instance ids
   set_fact:
     instanceids: "{{ awsfacts.instances|map(attribute='id')|list }}"
@@ -54,7 +45,7 @@
   tags: ['delete']
 
 - name: delete all instances
-  ignore_errors: yes
+  when: instanceids|length > 0
   ec2:
     instance_ids: "{{ instanceids }}"
     state: absent
