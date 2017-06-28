@@ -1,0 +1,20 @@
+---
+- name: Get VPC ID
+  ec2_vpc:
+    region: "{{ region }}"
+    state: present
+    cidr_block: '{{ cidr_block }}'
+    resource_tags:
+      environment: '{{ envname }}'
+      Name: '{{ envname }}'
+    internet_gateway: True
+    wait: yes
+  register: ec2_vpc_result
+
+- name: Retrieved VPC ID
+  debug:
+    var: ec2_vpc_result
+    verbosity: 1
+
+- set_fact:
+    vpcids: "{{ ec2_vpc_result.vpc_id }}"
