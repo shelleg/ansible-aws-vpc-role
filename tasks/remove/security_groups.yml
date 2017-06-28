@@ -1,14 +1,25 @@
 ---
 
+- debug:
+    var: vpcids
+    verbosity: 1
+
+- debug:
+    var: item
+    verbosity: 1
+  with_items: "{{ security_groups | map(attribute='name') | list }}"
+
 - name: delete all security groups
   ec2_group:
     region: "{{ region }}"
-    name: "{{ item[0] }}"
+    name: "{{ item[1] }}"
     description: "deleted security group"
     vpc_id: "{{ item[0] }}"
     state: absent
   with_nested:
     - "{{ vpcids }}"
-    - "{{ security_groups | map(attribute='name') | list }}"
+    - "{{ security_groups | map(attribute='name') | list | reverse | list }}"
   tags: ['delete']
     
+# the reverse of order in security_groups deletion is important cause if a specific security group 
+# depends on another you must delete it before you delete it's dependant one... nat over allow_vpn_ssh
