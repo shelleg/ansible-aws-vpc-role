@@ -38,7 +38,7 @@
 - name: List tags for elasticache Resource
   changed_when: False
   register: cmd_out
-  shell: "aws elasticache list-tags-for-resource --resource-name {{ elasticache_arn }}"
+  shell: "aws --region {{ region }} elasticache list-tags-for-resource --resource-name {{ elasticache_arn }}"
 
 - set_fact:
     tag_list: "{{ cmd_out.stdout|from_json }}"
@@ -50,4 +50,4 @@
 - name: Tag elasticache Resource
   register: elasticache_tags
   when: tag_list.TagList|selectattr('Key','equalto','environment')|list|length < 1
-  shell: "aws elasticache add-tags-to-resource --resource-name {{ elasticache_arn }} --tags Key=environment,Value={{ envname }}"
+  shell: "aws --region {{ region }} elasticache add-tags-to-resource --resource-name {{ elasticache_arn }} --tags Key=environment,Value={{ envname }}"
