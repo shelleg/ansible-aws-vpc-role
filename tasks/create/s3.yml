@@ -3,7 +3,7 @@
 - name: Create S3 bucket for deployment
   register: s3_bucket_result
   s3_bucket:
-    name: "{{ envname }}-imagestore-bucket"
+    name: "{{ envname }}-{{ region }}-imagestore-bucket"
     state: present
     region: "{{ region }}"
     tags:
@@ -15,4 +15,4 @@
     verbosity: 1
 
 - set_fact:
-    aws_s3_bucket_name: "{{ envname }}-imagestore-bucket"
+  aws_s3_bucket_name: "{{ envname }}-{{ region }}-imagestore-bucket"

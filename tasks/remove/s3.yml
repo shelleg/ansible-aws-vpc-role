@@ -2,7 +2,7 @@
 
 - name: Remove S3 bucket
   s3_bucket:
-    name: "{{ envname }}-imagestore-bucket"
+    name: "{{ envname }}-{{ region }}-imagestore-bucket"
     state: absent
     region: "{{ region }}"
     force: yes
