@@ -7,7 +7,7 @@
     state: present
     region: "{{ region }}"
     tags:
-      Name: '{{ envname }}-imagestore-bucket'
+      Name: '{{ envname }}-{{ region }}-imagestore-bucket'
       environment: '{{ envname }}'
 
 - debug:
