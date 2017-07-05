@@ -15,4 +15,4 @@
     verbosity: 1
 
 - set_fact:
-  aws_s3_bucket_name: "{{ envname }}-{{ region }}-imagestore-bucket"
+    aws_s3_bucket_name: "{{ envname }}-{{ region }}-imagestore-bucket"
