@@ -13,11 +13,11 @@
     image: '{{ item.0.image|default(ami) }}'
     groups: '{{ item.0.groups }}'
     instance_tags:
-      Name: '{{ envname }}-{{ item.0.name }}'
+      Name: '{{ item.0.name }}'
       environment: '{{ envname }}'
       roles: '{{ item.0.roles }}'
     count_tag:
-      Name: '{{ envname }}-{{ item.0.name}}'
+      Name: '{{ item.0.name}}'
       environment: '{{ envname }}'
     exact_count: '{{ item.0.count|default("1") }}'
     vpc_subnet_id: "{{ (vpc_subnet.results|selectattr('subnet.tags.net', 'equalto', item.1.name)|first).subnet.id }}"

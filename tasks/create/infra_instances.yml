@@ -17,11 +17,11 @@
     image: '{{ item.image|default(ami) }}'
     groups: '{{ item.groups|default(["allow_vpc"]) }}'
     instance_tags:
-      Name: '{{ envname }}-{{ item.name }}'
+      Name: '{{ item.name }}'
       environment: '{{ envname }}'
       roles: '{{ item.roles }}'
     count_tag:
-      Name: '{{ envname }}-{{ item.name}}'
+      Name: '{{ item.name}}'
       environment: '{{ envname }}'
     exact_count: '{% if use_data_cloud_services %}0{% else %}{{ item.count|default("1") }}{% endif %}'
     # use one of the private subnets
