@@ -8,11 +8,11 @@
     image: "{{ nat_instance.image }}"
     instance_type: "{{ nat_instance.type }}"
     instance_tags:
-      Name: "nat"
+      Name: "{{ envname }}-nat"
       environment: '{{ envname }}'
       roles: 'nat'
     count_tag:
-      Name: "nat"
+      Name: "{{ envname }}-nat"
       environment: '{{ envname }}'
     exact_count: 1
     vpc_subnet_id: "{{ (vpc_subnet.results|selectattr('subnet.tags.net', 'equalto', item.name)|first).subnet.id }}"
