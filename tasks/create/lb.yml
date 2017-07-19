@@ -21,7 +21,7 @@
     # subnets: "{{ vpc_subnet.results|selectattr('subnet.tags.type', 'equalto', 'public')|list|map(attribute='subnet.id')|list }}"
     subnets: "{{ vpc_subnet.results|selectattr('subnet.tags.type', 'equalto', 'public')|selectattr('subnet.tags.category', 'equalto', 'application')|list|map(attribute='subnet.id')|list }}"
     instance_ids: "{{ vars[item.name +'_instances'].strip().split(' ') }}"
-    security_group_names: [web_lb, allow_vpc]
+    security_group_names: "{{ item.lb_sec_group_names }}"
     scheme: "{{ item.scheme | default('internet-facing') }}"
     cross_az_load_balancing: yes
     # changed to one below because of a bug in Ansible 2.1.x.
