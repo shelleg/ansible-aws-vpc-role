@@ -49,7 +49,7 @@
 
     listeners:
       - protocol: https
-        load_balancer_port: 443
+        load_balancer_port: "{{ item.lb_port | default(443) }}"
         instance_protocol: "{{ item.instance_protocol }}"
         instance_port: "{{ item.instance_port }}"
         # proxy_protocol: True
@@ -58,3 +58,8 @@
 - debug:
     var: roles_elbs
     verbosity: 1
+
+- name: Update stickness expiration to never expire (can't set to never expire using ec2_elb_lb bug https://github.com/ansible/ansible/issues/27309)
+  with_items: '{{ load_balanced_roles }}'
+  command: "aws --region {{ region }} elb set-load-balancer-policies-of-listener --load-balancer-name {{ envname }}-{{ item.name|replace('_', '-') }} --load-balancer-port {{ item.lb_port }} --policy-names stickiness-expiration-period"
+  when: item.stickiness.expiration == 0
