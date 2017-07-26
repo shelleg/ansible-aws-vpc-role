@@ -36,7 +36,7 @@
     stickiness:
       type: "{{ item.stickiness.type }}"
       enabled: "{{ item.stickiness.enabled }}"
-      expiration: "{{ item.stickiness.expiration }}"
+      expiration: "{{ (item.stickiness.expiration == 0) | ternary(600, item.stickiness.expiration) }}"
 
     health_check:
       ping_protocol: "{{ item.health_check.ping_protocol }}"
@@ -59,7 +59,13 @@
     var: roles_elbs
     verbosity: 1
 
-- name: Update stickness expiration to never expire (can't set to never expire using ec2_elb_lb bug https://github.com/ansible/ansible/issues/27309)
-  with_items: '{{ load_balanced_roles }}'
-  command: "aws --region {{ region }} elb set-load-balancer-policies-of-listener --load-balancer-name {{ envname }}-{{ item.name|replace('_', '-') }} --load-balancer-port {{ item.lb_port }} --policy-names stickiness-expiration-period"
+- block:
+    - name: Create a never expire stickiness policy if expiration set to 0 (can't set to never expire using ec2_elb_lb bug https://github.com/ansible/ansible/issues/27309)
+      register: create_policy
+      with_items: "{{ load_balanced_roles }}"
+      command: aws --region {{ region }} elb create-lb-cookie-stickiness-policy --load-balancer-name {{ envname }}-{{ item.name|replace('_', '-') }} --policy-name never-expire
+
+    - name: Attache never-expire policy to the load-balancer
+      with_items: '{{ load_balanced_roles }}'
+      command: "aws --region {{ region }} elb set-load-balancer-policies-of-listener --load-balancer-name {{ envname }}-{{ item.name|replace('_', '-') }} --load-balancer-port {{ item.lb_port | default(443) }} --policy-names never-expire"
   when: item.stickiness.expiration == 0
